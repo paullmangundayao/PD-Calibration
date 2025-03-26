@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dimension Optimization</title>
+    <style>
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #FFFBF5, #eaddcd);
+            color: #000000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            transition: background 0.3s ease, color 0.3s ease;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .scroll-wrapper {
+            width: 100%;
+            max-height: 100vh;
+            overflow-y: auto;
+            display: flex;
+            justify-content: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: inherit;
+            text-align: left;
+            font-weight: bold;
+            letter-spacing: 0px;
+            margin-top: 40px;
+            padding: 10px;            
+            opacity: 0;
+            transform: translateY(-50px);
+            transition: opacity 1s ease, transform 1s ease;
+            display: inline-block;
+        }
+        
+        body.loaded h1 {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #000000;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 200vw;
+            height: 200vh;
+            background: radial-gradient(circle at 20% 20%, rgba(139, 143, 185, 0.3), transparent 25%),
+                        radial-gradient(circle at 80% 20%, rgba(60, 62, 77, 0.3), transparent 25%),
+                        radial-gradient(circle at 30% 80%, rgba(148, 119, 119, 0.3), transparent 25%),
+                        radial-gradient(circle at 70% 70%, rgba(127, 127, 131, 0.3), transparent 25%);
+            animation: animateBackground 7s ease-in-out infinite alternate;
+            z-index: 0;
+            pointer-events: none;
+            transition: background 0.3s ease;
+        }
+
+        .dark-mode .background-animation {
+            background: radial-gradient(circle at 20% 20%, rgba(124, 31, 150, 0.3), transparent 25%),
+                        radial-gradient(circle at 800% 20%, rgba(58, 145, 163, 0.3), transparent 25%),
+                        radial-gradient(circle at 30% 80%, rgba(37, 26, 81, 0.3), transparent 25%),
+                        radial-gradient(circle at 70% 70%, rgba(43, 15, 46, 0.3), transparent 25%);
+        }
+        
+        @keyframes animateBackground {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(-10%, -10%) scale(1.1); }
+            100% { transform: translate(10%, 10%) scale(1.2); }
+        }
+
+        .container 
+        {
+            width: 95%;
+            max-width: 1500px;
+            max-height: 1200px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            padding-top: 10px;
+            padding-bottom: 50px;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        .tooltip 
+        {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: auto;
+            max-width: 90%; 
+            background: #ffffff;
+            color: #000000;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            display: none; 
+            z-index: 1000; 
+            box-sizing: border-box;
+            text-align: justify;
+            }
+
+        .button-done 
+        {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #024CAA;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .button-done:hover 
+        {
+            background-color: #0161A9; 
+        }
+
+
+        .tooltip.dark-mode 
+        {
+            background: #2C2D3B;
+            color: #FBF8F0;
+        }
+
+        .dark-mode 
+        {
+            background: #0b0e24;
+            color: #FBF8F0;
+        }
+
+        .dark-mode .container 
+        {
+            background: rgba(20, 20, 35, 0.95);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .content-wrapper 
+        {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr; 
+            gap: 20px;
+            width: 94%;
+        }
+
+        .card-light 
+        {
+            background: #fafafa;
+            color: #181C14; 
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            padding: 20px;
+            text-align: center;
+            max-height: 800px;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s;
+        }
+
+        .button-container-light 
+        {
+            width: 91%;
+            background: rgb(255, 255, 255);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        #resultsContainer 
+        {
+            width: 100%;
+            height: 100%;
+            background: #FEFEFE;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 70px; 
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            transition: transform 0.3s ease;
+            backdrop-filter: blur(10px);
+            box-sizing: border-box;
+            
+        }
+
+        .dark-mode #resultsContainer 
+        {
+            background: #FEFEFE;
+            color: #181C14;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s;
+        }
+
+        #resultsContainer ul 
+        {
+            list-style-type: none;
+            padding-left: 0;
+            padding-bottom: 50px;
+            
+        }
+
+        #resultsContainer li 
+        {
+            margin-bottom: 20px;
+        }
+
+        button 
+        {
+            background-color: #024CAA;
+            color: #FBF8F0;
+            font-size: 1rem;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        button:disabled 
+        {
+            background-color: #9A9A9A;
+            cursor: not-allowed;
+        }
+
+        button:hover:enabled 
+        {
+            background-color: #4ff0ed;
+            color: #FBF8F0;
+            transform: translateY(-2px);
+        }
+
+        #progressContainer 
+        {
+            width: 100%;
+            margin-top: 10px;
+            display: none;
+        }
+
+        #progressBar 
+        {
+            width: 0%;
+            height: 20px;
+            background-color: #6EC207;
+            border-radius: 5px;
+            transition: width 0.4s ease;
+        }
+
+        #progressText 
+        {
+            margin-top: 5px;
+            font-size: 0.9rem;
+            color: #555;
+            text-align: center;
+        }
+        
+        .header 
+        {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: flex-start;
+            width: 100%;
+            padding: 10px;
+        }
+        
+        .header img 
+        {
+            width: 100px; 
+            height: 100px; 
+            padding-top: 10px;
+            padding-left: 45px;
+            transition: none;
+        }
+
+        #detectedDimensions 
+        {
+            font-size: 1.2rem; 
+        }
+
+        #resultsContainer 
+        {
+            font-size: 1.2rem; 
+        }
+
+        .menu 
+        {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: auto;
+            color: #ffffff;
+            margin-left: 10px;
+            background-color: #0e1b31;
+            border: px solid #ccc;
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 100;
+            margin-left: 20px;
+            margin-top: 15px;
+        }
+
+        .menu button 
+        {
+            display: block;
+            padding: 9.5px;
+            text-align: center;
+            border: 0px solid #ccc;
+            border-color: #ccc;
+            background: #0e1b31;
+            cursor: pointer;
+            color: white;
+        }
+
+        .menu-content 
+        {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 100%;
+            display: flex; 
+            gap: 10px; 
+            padding: 10px;
+            background-color: rgb(4, 4, 33);
+            border: 0px solid #0e1b31;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.99);
+            z-index: 101;
+        }
+
+        .menu-content button 
+        {
+            padding: 10px 15px;
+            background: rgb(17, 17, 51);
+            background-color: #0e1b31;
+            color: white;
+            text-align: center;
+            width: 156px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .menu-content button:hover 
+        {
+            background-color: #04eff7;
+        }
+        
+        #modePopup 
+        {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: auto;
+            max-width: 90%;
+            background: #ffffff;
+            color: #000000;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        #modePopup button 
+        {
+            padding: 10px 20px;
+            margin: 10px 5px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #024CAA;
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+
+        #modePopup button:hover 
+        {
+            background-color: #04eff7;
+        }
+
+        #modePopup .button-done 
+        {
+            background-color: #9A9A9A;
+        }
+
+        #modePopup .button-done:hover 
+        {
+            background-color: #c2c2c2;
+        }
+
+        #selectedModeInline 
+        {
+            font-weight: bold;
+            color: #024CAA; 
+            margin-left: 10px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="background-animation"></div>
+    <div class="scroll-wrapper">
+        <div class="container">
+            <div class="header">
+                <img src="https://3.bp.blogspot.com/-TgxQ9rzb__0/VYpnUQFUnvI/AAAAAAAAA5k/JJEJNRvSAKs/s1600/tesseract-landing-cover.png" alt="Logo">
+                <h1>EXACTOPACK</h1>
+            </div>
+            <div class="content-wrapper">
+                <div id="capturedImage" class="card-light">
+                    <h2>Captured Image</h2>
+                </div>
+                <div id="detectedDimensions" class="card-light">
+                    <h2>Detected Dimensions</h2>
+                </div>
+                <div id="resultsContainer" class="card-light">
+                    <h2>Optimal Result</h2>
+                </div>                
+            </div>
+
+            <div id="buttonContainer" class="button-container-light">
+                <button id="detectButton">Detect Dimensions</button>
+                <button id="clearButton">Clear Results</button>
+                <button id="modeSelection">Packaging Mode</button>
+                <button id="startPackingButton">Start Packing</button>
+                <div id="progressContainer">
+                    <div id="progressBar"></div>
+                    <div id="progressText">Initializing...</div>
+                </div>
+            </div>            
+        </div>
+    </div>
+
+    <div class="background-animation"></div>
+
+    <div class="tooltip" id="helpTooltip">
+        <p><strong>Detect Dimensions Button:</strong> Captures object dimensions, displays the image with a bounding box in the Captured Image container, and shows the detected measurements in the Detected Dimensions container.</p>
+        <p><strong>Process Dimensions Button:</strong> Calculates the optimal packaging dimensions based on detected data and display the result on the results container.</p>
+        <p><strong>Clear Results Button:</strong> Clear the captured image, detected dimensions, and results.</p>
+        <p><strong>Packaging Mode Button:</strong> Give the user option to choose whether the product to be packed is fragile or not, for better customization.</p>
+        <p><strong>Start Packing Button:</strong> Starts the automatic packaging process based on algorithm's suggested bubble wrap size.</p>
+        <button class="button-done" onclick="toggleTooltip('helpTooltip')">Understood</button>
+    </div>
+    
+    <div class="tooltip" id="infoTooltip">
+        <p><strong>Team Composition:</strong></p>
+        <p>Christelle John T. Ladisla - Railway Engineering</p>
+        <p>Danilo Jr. G. Buan - Intelligent Systems</p>
+        <p>Marcus Joshua D.C. Espiritu - Systems Administration</p>
+        <p>Paull Andrei A. Mangundayao - Systems Administration</p>
+        <p>Raven Charles Roy P. Jacinto - Intelligent Systems</p>
+        <button class="button-done" onclick="toggleTooltip('infoTooltip')">Done</button>
+    </div>  
+
+    <div class="tooltip" id="aboutTooltip" style="display: none;">
+        <p><strong>About the Project:</strong></p>
+        <p>This project, named <strong>EXACTOPACK</strong>, is a design of packaging material optimization system for an automated bubble wrap packaging process, focusing on enhancing efficiency and reducing plastic waste in e-commerce. The system automates the measurement of products using a 3D depth camera, optimizes the use of bubble wrap using a metaheuristic algorithm, automates the wrapping of the product using the optimized bubble wrap size, and delivers fully packaged products ready for final labeling and delivery.</p>
+        <button class="button-done" onclick="toggleTooltip('aboutTooltip')">Close</button>
+    </div>
+
+    <div class="menu">
+        <button onclick="toggleMenu()">☰ Menu</button>
+        <div class="menu-content" id="menuContent" style="display:none;">
+            <button onclick="toggleTooltip('infoTooltip')">Team Information</button>
+            <button onclick="toggleTooltip('helpTooltip')">Help</button>
+            <button onclick="toggleDarkMode()">Switch Mode</button>
+            <button onclick="toggleTooltip('aboutTooltip')">About the Project</button>
+        </div>
+    </div>
+
+    <div id="modePopup" class="tooltip" style="display: none;">
+        <p><strong>Select Packaging Mode:</strong> 
+            <span id="selectedModeInline" style="font-weight: bold; color: #024CAA; margin-left: 10px;">None</span>
+        </p>        
+        <button id="fragileButton">Fragile Mode</button>
+        <button id="nonFragileButton">Non-fragile Mode</button>
+        <button class="button-done" onclick="togglePopup('modePopup')">Cancel</button>
+    </div>    
+    
+    <script>
+        document.getElementById('clearButton').addEventListener('click', () => {
+            const capturedImageContainer = document.getElementById('capturedImage');
+            capturedImageContainer.innerHTML = '<h2>Captured Image</h2>';
+    
+            const detectedDimensionsContainer = document.getElementById('detectedDimensions');
+            detectedDimensionsContainer.innerHTML = '<h2>Detected Dimensions</h2>';
+    
+            const resultsContainer = document.getElementById('resultsContainer');
+            resultsContainer.innerHTML = '<h2>Optimal Result</h2>';
+    
+            console.log('Data cleared from all containers.');
+        });
+    </script>
+    
+    <script>
+
+        function togglePopup(popupId) {
+            const popup = document.getElementById(popupId);
+            popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
+        }
+    
+        document.getElementById('modeSelection').addEventListener('click', () => {
+            togglePopup('modePopup');
+        });
+
+        document.getElementById('fragileButton').addEventListener('click', async () => {
+            const mode = 'Fragile Mode';
+            console.log(`Mode selected: ${mode}`);
+            document.getElementById('selectedModeInline').textContent = mode; 
+            document.getElementById('startPackingButton').disabled = false;
+
+            togglePopup('modePopup'); 
+
+            await fetch(`http://${SERVER_IP}:5001/set-mode`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mode })
+            });
+        });
+
+        document.getElementById('nonFragileButton').addEventListener('click', async () => {
+            const mode = 'Non-fragile Mode';
+            console.log(`Mode selected: ${mode}`);
+            document.getElementById('selectedModeInline').textContent = mode; 
+            document.getElementById('startPackingButton').disabled = false;
+
+            togglePopup('modePopup'); 
+
+            await fetch(`http://${SERVER_IP}:5001/set-mode`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mode })
+            });
+        });
+
+
+    </script>
+    
+    <script>
+        const SERVER_IP = '127.0.0.1';
+        let capturedDimensions = null;
+
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        const buttonContainer = document.getElementById('buttonContainer');
+        const resultsContainer = document.getElementById('resultsContainer');
+
+        window.addEventListener('load', () => {
+            document.body.classList.add('loaded');
+        });
+
+        function updateProgressBar(percentage, text) {
+            progressContainer.style.display = 'block';
+            progressBar.style.width = `${percentage}%`;
+            progressText.textContent = text;
+        }
+
+        function resetProgressBar() {
+            progressContainer.style.display = 'none';
+            progressBar.style.width = '0%';
+            progressText.textContent = '';
+        }
+
+        function toggleMenu() {
+            const menuContent = document.getElementById("menuContent");
+            menuContent.style.display = menuContent.style.display === "flex" ? "none" : "flex";
+        }
+
+
+        function toggleTooltip(tooltipId) {
+            var tooltip = document.getElementById(tooltipId);
+            var isDisplayed = window.getComputedStyle(tooltip).display !== "none";
+            tooltip.style.display = isDisplayed ? "none" : "block";
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle("dark-mode");
+        }
+
+        function toggleMode() {
+            const backgroundAnimation = document.querySelector('.background-animation');
+            if (backgroundAnimation) {
+                backgroundAnimation.classList.toggle('light-mode');
+                backgroundAnimation.classList.toggle('dark-mode');
+            }
+        }
+
+        function toggleTooltip(tooltipId) {
+            const tooltip = document.getElementById(tooltipId);
+            const otherTooltipId = tooltipId === 'helpTooltip' ? 'infoTooltip' : 'helpTooltip';
+            const otherTooltip = document.getElementById(otherTooltipId);
+
+            if (otherTooltip.style.display === 'block') {
+                otherTooltip.style.display = 'none';
+            }
+
+            tooltip.style.display = tooltip.style.display === 'block' ? 'none' : 'block';
+        }
+
+        document.getElementById('detectButton').addEventListener('click', async () => {
+    updateProgressBar(10, 'Starting detection...');
+    try {
+        const response = await fetch(`http://127.0.0.1:5001/capture-dimensions`);
+        if (!response.ok) {
+            throw new Error('Failed to capture dimensions. Please check your camera.');
+        }
+
+        updateProgressBar(50, 'Processing captured image...');
+        const data = await response.json();
+        if (data.error) {
+            throw new Error(data.error);
+        }
+
+        // Display the captured image
+        const capturedImageDiv = document.getElementById('capturedImage');
+        capturedImageDiv.innerHTML = `
+            <h2>Captured Image</h2>
+            <img src="${data.image_url}" alt="Captured Image" style="width:100%">
+        `;
+
+        // Display the detected dimensions
+        const detectedDimensionsContainer = document.getElementById('detectedDimensions');
+        detectedDimensionsContainer.innerHTML = `
+            <h2>Detected Dimensions</h2>
+            <p>Length: ${data.measured_dimensions.length.toFixed(2)} cm</p>
+            <p>Width: ${data.measured_dimensions.width.toFixed(2)} cm</p>
+            <p>Height: ${data.measured_dimensions.height.toFixed(2)} cm</p>
+        `;
+
+        // Display the optimal result
+        const resultsContainer = document.getElementById('resultsContainer');
+        resultsContainer.innerHTML = `
+            <h2>Optimal Result</h2>
+            <p>Optimal Dimensions:</p>
+            <ul>
+                <li>Length: ${data.optimal_dimensions['Optimal Length'].toFixed(2)} cm</li>
+                <li>Height: ${data.optimal_dimensions['Optimal Height'].toFixed(2)} cm</li>
+                <li>Width: ${data.optimal_dimensions['Optimal Width'].toFixed(2)} cm</li>
+            </ul>
+            <p>Bubble Wrap Size:</p>
+            <ul>
+                <li>Length: ${data.bubble_wrap_size.length.toFixed(2)} cm</li>
+                <li>Width: ${data.bubble_wrap_size.width.toFixed(2)} cm</li>
+            </ul>
+        `;
+
+        updateProgressBar(100, 'Detection and processing complete!');
+        setTimeout(resetProgressBar, 2000);
+    } catch (error) {
+        alert(error.message);
+        resetProgressBar();
+    }
+});
+        document.getElementById('processButton').addEventListener('click', async () => {
+            if (!capturedDimensions) {
+                alert('Error: No dimensions detected. Please detect dimensions first.');
+                return;
+            }
+
+            updateProgressBar(20, 'Starting processing...');
+            try {
+                const response = await fetch(`http://${SERVER_IP}:5001/process-dimensions`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(capturedDimensions),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to process dimensions.');
+                }
+
+                updateProgressBar(70, 'Calculating optimal dimensions...');
+                const data = await response.json();
+                const resultsDiv = document.getElementById('resultsContainer');
+                resultsDiv.innerHTML = `
+                    <h2>Results</h2>
+                    <p>Optimal Dimensions:</p>
+                    <ul>
+                        <li>Length: ${data.optimal_dimensions["Optimal Length"].toFixed(2)} cm</li>
+                        <li>Width: ${data.optimal_dimensions["Optimal Width"].toFixed(2)} cm</li>
+                        <li>Height: ${data.optimal_dimensions["Optimal Height"].toFixed(2)} cm</li>
+                    </ul>
+                    <p>Bubble Wrap Size:</p>
+                    <ul>
+                        <li>Length: ${data.bubble_wrap_size.length.toFixed(2)} cm</li>
+                        <li>Width: ${data.bubble_wrap_size.width.toFixed(2)} cm</li>
+                    </ul>
+                `;
+
+                updateProgressBar(100, 'Processing complete!');
+                setTimeout(resetProgressBar, 2000);
+            } catch (error) {
+                alert(error.message);
+                resetProgressBar();
+            }
+        });
+
+        document.getElementById('fragileButton').addEventListener('click', async () => {
+            const mode = 'Fragile';
+            console.log(`Mode selected: ${mode}`);
+            document.getElementById('selectedMode').innerHTML = `Selected Mode: <strong>${mode}</strong>`;
+            document.getElementById('startPackingButton').disabled = false; 
+
+            await fetch(`http://${SERVER_IP}:5001/set-mode`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mode })
+            });
+        });
+
+        document.getElementById('nonFragileButton').addEventListener('click', async () => {
+            const mode = 'Non-fragile';
+            console.log(`Mode selected: ${mode}`);
+            document.getElementById('selectedMode').innerHTML = `Selected Mode: <strong>${mode}</strong>`;
+            document.getElementById('startPackingButton').disabled = false;
+
+            await fetch(`http://${SERVER_IP}:5001/set-mode`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mode })
+            });
+        });
+
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const body = document.body;
+        let darkModeEnabled = false;
+
+        document.getElementById('darkModeToggle').addEventListener('click', function () {
+            const isDarkMode = body.classList.toggle('dark-mode'); 
+            const buttonContainer = document.getElementById('buttonContainer');
+            if (isDarkMode) {
+                buttonContainer.classList.remove('button-container-light');
+                buttonContainer.classList.add('button-container-dark');
+            } else {
+                buttonContainer.classList.remove('button-container-dark');
+                buttonContainer.classList.add('button-container-light');
+            }
+        });
+
+    </script>
+</body>
+</html>

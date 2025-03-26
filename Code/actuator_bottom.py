@@ -3,11 +3,11 @@
 import RPi.GPIO as GPIO
 import time
 
-# Define GPIO pins for Actuator 1 (Top Sealer 1)
+# Define GPIO pins for Actuator 1 (Buttom Sealer 1)
 ACTUATOR3_PIN1 = 24  # GPIO24 (Pin 18)
 ACTUATOR4_PIN2 = 5   # GPIO5  (Pin 29)
 
-# Define GPIO pins for Actuator 2 (Top Sealer 2)
+# Define GPIO pins for Actuator 2 (Buttom Sealer 2)
 ACTUATOR5_PIN1 = 25  # GPIO25 (Pin 22)
 ACTUATOR6_PIN2 = 6   # GPIO6  (Pin 31)
 
@@ -25,7 +25,7 @@ def turn_off_actuators():
     GPIO.output(ACTUATOR5_PIN1, GPIO.HIGH)
     GPIO.output(ACTUATOR6_PIN2, GPIO.HIGH)
 
-# Push Actuator 1 (Top Sealer 1)
+# Push Actuator 1 (Buttom Sealer 1)
 def actuator1_push():
     GPIO.output(ACTUATOR3_PIN1, GPIO.LOW)
     GPIO.output(ACTUATOR4_PIN2, GPIO.HIGH)
@@ -35,7 +35,7 @@ def actuator1_pull():
     GPIO.output(ACTUATOR3_PIN1, GPIO.HIGH)
     GPIO.output(ACTUATOR4_PIN2, GPIO.LOW)
 
-# Push Actuator 2 (Top Sealer 2)
+# Push Actuator 2 (Buttom Sealer 2)
 def actuator2_push():
     GPIO.output(ACTUATOR5_PIN1, GPIO.LOW)
     GPIO.output(ACTUATOR6_PIN2, GPIO.HIGH)

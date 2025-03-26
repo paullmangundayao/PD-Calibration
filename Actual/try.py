@@ -123,6 +123,8 @@ try:
     actuator_pull(ACT2_PIN1, ACT2_PIN2)
     time.sleep(1)
 
+    input("Initial seal complete. Press Enter to proceed to actual packing...")
+
     print("[2] Placing product using servo...")
     set_servo(SERVO_PIN, pwm_servo, 85)
     time.sleep(3)

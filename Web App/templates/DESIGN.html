@@ -647,6 +647,13 @@
             throw new Error(data.error);
         }
 
+        // ✅ New: Show delivery popup if successful
+        if (data.delivery) {
+            setTimeout(() => {
+                alert("Scan successful! Please deliver the product.");
+            }, 1000);
+        }
+
         // Display the captured image
         const capturedImageDiv = document.getElementById('capturedImage');
         capturedImageDiv.innerHTML = `
@@ -682,11 +689,13 @@
 
         updateProgressBar(100, 'Detection and processing complete!');
         setTimeout(resetProgressBar, 2000);
+
     } catch (error) {
-        alert(error.message);
+        alert(error.message); // ✅ Keeps error alert intact
         resetProgressBar();
     }
 });
+
         document.getElementById('processButton').addEventListener('click', async () => {
             if (!capturedDimensions) {
                 alert('Error: No dimensions detected. Please detect dimensions first.');

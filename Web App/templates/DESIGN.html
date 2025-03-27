@@ -431,6 +431,29 @@
             margin-left: 10px;
         }
 
+        #deliveryPopup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: auto;
+            max-width: 90%;
+            background: #ffffff;
+            color: #000000;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            box-sizing: border-box;
+            text-align: center;
+            display: none;
+        }
+
+        #deliveryPopup.dark-mode {
+            background: #2C2D3B;
+            color: #FBF8F0;
+        }
+
     </style>
 </head>
 <body>
@@ -462,6 +485,12 @@
                 </div>
             </div>            
         </div>
+    </div>
+
+    <div class="tooltip" id="deliveryPopup">
+        <p><strong>Scan successful!</strong> The product is ready to be delivered.</p>
+        <p>Would you like to initiate the delivery now?</p>
+        <button class="button-done" onclick="deliverProduct()">Yes, Deliver Now</button>
     </div>
 
     <div class="background-animation"></div>
@@ -637,11 +666,29 @@
         updateProgressBar(100, 'Detection and processing complete!');
         setTimeout(resetProgressBar, 2000);
 
-    } catch (error) {
-        alert(error.message); // ✅ Keeps error alert intact
-        resetProgressBar();
-    }
-});
+        setTimeout(() => {
+                    document.getElementById("deliveryPopup").style.display = "block";
+                }, 500);
+
+            } catch (error) {
+                alert(error.message);
+                resetProgressBar();
+            }
+        });
+
+        function deliverProduct() {
+            fetch(`http://${SERVER_IP}:5001/deliver-product`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert("Delivery Activated: " + data.status);
+                document.getElementById('deliveryPopup').style.display = 'none';
+            })
+            .catch(error => {
+                alert("Delivery failed: " + error.message);
+            });
+        }
 
         document.getElementById('processButton').addEventListener('click', async () => {
             if (!capturedDimensions) {

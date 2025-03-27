@@ -623,13 +623,6 @@
             throw new Error(data.error);
         }
 
-        // ✅ New: Show delivery popup if successful
-        if (data.delivery) {
-            setTimeout(() => {
-                alert("Scan successful! Please deliver the product.");
-            }, 1000);
-        }
-
         // Display the captured image
         const capturedImageDiv = document.getElementById('capturedImage');
         capturedImageDiv.innerHTML = `

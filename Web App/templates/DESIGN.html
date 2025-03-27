@@ -456,8 +456,6 @@
             <div id="buttonContainer" class="button-container-light">
                 <button id="detectButton">Detect Dimensions</button>
                 <button id="clearButton">Clear Results</button>
-                <button id="modeSelection">Packaging Mode</button>
-                <button id="startPackingButton">Start Packing</button>
                 <div id="progressContainer">
                     <div id="progressBar"></div>
                     <div id="progressText">Initializing...</div>
@@ -472,8 +470,6 @@
         <p><strong>Detect Dimensions Button:</strong> Captures object dimensions, displays the image with a bounding box in the Captured Image container, and shows the detected measurements in the Detected Dimensions container.</p>
         <p><strong>Process Dimensions Button:</strong> Calculates the optimal packaging dimensions based on detected data and display the result on the results container.</p>
         <p><strong>Clear Results Button:</strong> Clear the captured image, detected dimensions, and results.</p>
-        <p><strong>Packaging Mode Button:</strong> Give the user option to choose whether the product to be packed is fragile or not, for better customization.</p>
-        <p><strong>Start Packing Button:</strong> Starts the automatic packaging process based on algorithm's suggested bubble wrap size.</p>
         <button class="button-done" onclick="toggleTooltip('helpTooltip')">Understood</button>
     </div>
     
@@ -489,7 +485,11 @@
 
     <div class="tooltip" id="aboutTooltip" style="display: none;">
         <p><strong>About the Project:</strong></p>
-        <p>This project, named <strong>EXACTOPACK</strong>, is a design of packaging material optimization system for an automated bubble wrap packaging process, focusing on enhancing efficiency and reducing plastic waste in e-commerce. The system automates the measurement of products using a 3D depth camera, optimizes the use of bubble wrap using a metaheuristic algorithm, automates the wrapping of the product using the optimized bubble wrap size, and delivers fully packaged products ready for final labeling and delivery.</p>
+        <p>This project, named <strong>EXACTOPACK</strong>, is a design of packaging material optimization system for 
+        an automated bubble wrap packaging process, focusing on enhancing efficiency and reducing plastic waste in 
+        e-commerce. The system automates the measurement of products using web cameras, optimizes the use of bubble wrap
+        using a metaheuristic algorithm, automates the wrapping of the product using the optimized bubble wrap size, and 
+        delivers fully packaged products ready for final labeling and delivery.</p>
         <button class="button-done" onclick="toggleTooltip('aboutTooltip')">Close</button>
     </div>
 
@@ -501,16 +501,7 @@
             <button onclick="toggleDarkMode()">Switch Mode</button>
             <button onclick="toggleTooltip('aboutTooltip')">About the Project</button>
         </div>
-    </div>
-
-    <div id="modePopup" class="tooltip" style="display: none;">
-        <p><strong>Select Packaging Mode:</strong> 
-            <span id="selectedModeInline" style="font-weight: bold; color: #024CAA; margin-left: 10px;">None</span>
-        </p>        
-        <button id="fragileButton">Fragile Mode</button>
-        <button id="nonFragileButton">Non-fragile Mode</button>
-        <button class="button-done" onclick="togglePopup('modePopup')">Cancel</button>
-    </div>    
+    </div> 
     
     <script>
         document.getElementById('clearButton').addEventListener('click', () => {
@@ -525,50 +516,6 @@
     
             console.log('Data cleared from all containers.');
         });
-    </script>
-    
-    <script>
-
-        function togglePopup(popupId) {
-            const popup = document.getElementById(popupId);
-            popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
-        }
-    
-        document.getElementById('modeSelection').addEventListener('click', () => {
-            togglePopup('modePopup');
-        });
-
-        document.getElementById('fragileButton').addEventListener('click', async () => {
-            const mode = 'Fragile Mode';
-            console.log(`Mode selected: ${mode}`);
-            document.getElementById('selectedModeInline').textContent = mode; 
-            document.getElementById('startPackingButton').disabled = false;
-
-            togglePopup('modePopup'); 
-
-            await fetch(`http://${SERVER_IP}:5001/set-mode`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ mode })
-            });
-        });
-
-        document.getElementById('nonFragileButton').addEventListener('click', async () => {
-            const mode = 'Non-fragile Mode';
-            console.log(`Mode selected: ${mode}`);
-            document.getElementById('selectedModeInline').textContent = mode; 
-            document.getElementById('startPackingButton').disabled = false;
-
-            togglePopup('modePopup'); 
-
-            await fetch(`http://${SERVER_IP}:5001/set-mode`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ mode })
-            });
-        });
-
-
     </script>
     
     <script>

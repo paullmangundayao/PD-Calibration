@@ -6,11 +6,12 @@ import keyboard
 # ----------------- GPIO CONFIG -----------------
 STEP_PIN = 16
 DIR_PIN = 20
+EN_PIN = # Add Enable pin (OPTIONAL FOR LINEAR SLIDE RAILS)
 
-relay1 = 22
-relay2 = 27
-relay3 = 23
-relay4 = 17
+relay1 = 22 # Horizontal
+relay2 = 27 # Horizontal
+relay3 = 23 # Horizontal
+relay4 = 17 # Horizontal
 
 SERVO_PIN = 4  # Product slider
 
@@ -32,7 +33,7 @@ pwm.start(0)
 STEPS_PER_REV = 3200
 LEAD_SCREW_PITCH = 8
 STEPS_PER_MM = STEPS_PER_REV / LEAD_SCREW_PITCH
-FIXED_LENGTH_MM = 10
+FIXED_LENGTH_MM = 10 # Fixed length depending on initial seal length
 
 # ----------------- FUNCTION DEFINITIONS -----------------
 def move_stepper(length_mm):
@@ -74,7 +75,7 @@ def set_servo_angle(angle):
     GPIO.output(SERVO_PIN, False)
     pwm.ChangeDutyCycle(0)
 
-def ask_for_distance():
+def ask_for_distance(): # Stepper roller
     while True:
         user_input = input("Enter the distance in mm for the stepper motor to move: ").strip()
         try:
@@ -109,7 +110,7 @@ try:
             break
         time.sleep(0.05)
 
-    # 🔁 Stepper distance input (decimal + validation)
+    # Stepper distance input
     distance_mm = ask_for_distance()
     move_stepper(distance_mm)
 

@@ -8,7 +8,7 @@ from serv_cam import ServoCamera
 # Configure logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
-class VisionOptimizer:
+class AlgoOptimizer:
     def __init__(self):
         # Camera calibration constants
         self.PIXEL_TO_CM_RATIO_FRONT = 0.06035
@@ -21,7 +21,7 @@ class VisionOptimizer:
         self.MUTATION_RATE = 0.1
         
         # Hardware controller
-        self.hardware = HardwareController()
+        self.hardware = ServoCamera()
     
     def detect_front_dimensions(self, camera):
         """Detects object width and height from front camera"""

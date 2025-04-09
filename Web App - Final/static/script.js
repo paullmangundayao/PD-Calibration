@@ -20,6 +20,22 @@ function resetProgressBar() {
   progressText.textContent = '';
 }
 
+// ▶️ Activate Initial Sealing Button Listener
+document.getElementById('initialSealButton').addEventListener('click', async () => {
+  updateProgressBar(10, 'Activating Initial Sealing...');
+  try {
+    const response = await fetch('/initial-seal', { method: 'POST' });
+    const result = await response.json();
+
+    if (!response.ok) throw new Error(result.message || 'Initial sealing failed');
+    alert(result.message);
+  } catch (error) {
+    alert(error.message);
+  } finally {
+    resetProgressBar();
+  }
+});
+
 // Toggle the display of the menu
 function toggleMenu() {
   const menuContent = document.getElementById("menuContent");

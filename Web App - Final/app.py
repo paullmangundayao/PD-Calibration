@@ -1,6 +1,8 @@
 from flask import Flask, jsonify, request, send_from_directory, render_template
+# from initial_seal import InitialSealController
+# from delivery_mechanism import run_delivery
 import os
-import ALGOPYTEST as detection
+import algo as detection
 import logging
 import traceback
 
@@ -12,9 +14,25 @@ logging.basicConfig(level=logging.DEBUG)
 # Directory where images are stored
 IMAGE_FOLDER = '/home/team48/packaging_env/images'
 
+from flask import redirect, url_for
+
 @app.route('/')
 def index():
-    return render_template('DESIGN.html')
+    return redirect(url_for('login'))
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+
+        if username == 'admin' and password == '1234':
+            return render_template('index.html')  
+        else:
+            error = "Invalid username or password."
+            return render_template('login.html', error=error)
+
+    return render_template('login.html')
 
 @app.route('/capture-dimensions', methods=['GET'])
 def capture_dimensions():
@@ -43,31 +61,42 @@ def capture_dimensions():
 @app.route('/deliver-product', methods=['POST'])
 def deliver_product():
     try:
-        import RPi.GPIO as GPIO
-        import time
-
-        SERVO_PIN = 4
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setwarnings(False)
-        GPIO.setup(SERVO_PIN, GPIO.OUT)
-
-        pwm = GPIO.PWM(SERVO_PIN, 50)
-        pwm.start(0)
-
-        angle = 85
-        duty = (angle / 18) + 2.5
-        GPIO.output(SERVO_PIN, True)
-        pwm.ChangeDutyCycle(duty)
-        time.sleep(0.5)
-        GPIO.output(SERVO_PIN, False)
-        pwm.ChangeDutyCycle(0)
-
-        pwm.stop()
-        GPIO.cleanup()
-
-        return jsonify({"status": "Servo moved to delivery position."})
+        success = run_delivery()
+        if success:
+            return jsonify({
+                "status": "success",
+                "message": "Product packed successfully"
+            })
+        else:
+            return jsonify({
+                "status": "error",
+                "message": "Failed to activate packaging mechanism"
+            }), 500
     except Exception as e:
-        return jsonify({"error": "Failed to activate servo", "detail": str(e)}), 500
+        logging.error(f"Delivery error: {str(e)}")
+        return jsonify({
+            "status": "error",
+            "message": "Delivery failed",
+            "detail": str(e)
+        }), 500
+
+@app.route('/initial-seal', methods=['POST'])
+def initial_seal():
+    try:
+        controller = InitialSealController()
+        controller.perform_initial_seal()
+        controller.cleanup()
+        return jsonify({
+            "status": "success",
+            "message": "Initial sealing completed successfully"
+        })
+    except Exception as e:
+        logging.error(f"Initial sealing error: {str(e)}")
+        return jsonify({
+            "status": "error",
+            "message": "Initial sealing failed",
+            "detail": str(e)
+        }), 500
 
 @app.route('/images/<filename>')
 def images(filename):

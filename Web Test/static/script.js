@@ -149,7 +149,7 @@ document.getElementById('detectButton').addEventListener('click', async () => {
     setTimeout(() => {
       resetProgressBar();
       showDeliveryPopup(); // 👈 Moved here after full display
-    }, 2000);
+    }, 5000);
   } catch (error) {
     alert(error.message);
     resetProgressBar();

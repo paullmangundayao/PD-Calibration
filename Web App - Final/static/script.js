@@ -74,7 +74,7 @@ function showDeliveryPopup() {
     </div>
   `;
   document.body.appendChild(popup);
-  
+
   // Event listeners (Delivery Popup)
   document.getElementById('deliverButton').addEventListener('click', async () => {
     try {
@@ -98,40 +98,10 @@ function showDeliveryPopup() {
   });
 }
 
-// Modify your detectButton event listener to show the popup after successful scan
+// ✅ Only ONE Detect Button Listener
 document.getElementById('detectButton').addEventListener('click', async () => {
   updateProgressBar(10, 'Starting detection...');
   try {
-    const response = await fetch('/capture-dimensions');
-    if (!response.ok) throw new Error('Failed to capture dimensions');
-    updateProgressBar(50, 'Processing captured image...');
-    const data = await response.json();
-    if (data.error) throw new Error(data.error);
-
-    updateProgressBar(100, 'Detection complete!');
-    setTimeout(() => {
-      resetProgressBar();
-      showDeliveryPopup(); // Show the popup after scan is complete
-    }, 1000);
-  } catch (error) {
-    alert(error.message);
-    resetProgressBar();
-  }
-});
-
-// Clear data from containers
-document.getElementById('clearButton').addEventListener('click', () => {
-  document.getElementById('capturedImage').innerHTML = '<h2>Captured Image</h2>';
-  document.getElementById('detectedDimensions').innerHTML = '<h2>Detected Dimensions</h2>';
-  document.getElementById('resultsContainer').innerHTML = '<h2>Optimal Result</h2>';
-  console.log('Data cleared from all containers.');
-});
-
-// Detect dimensions event
-document.getElementById('detectButton').addEventListener('click', async () => {
-  updateProgressBar(10, 'Starting detection...');
-  try {
-    // Use a relative URL so it works on the same host/port as Flask
     const response = await fetch('/capture-dimensions');
     if (!response.ok) {
       throw new Error('Failed to capture dimensions. Please check your camera or sensor setup.');
@@ -176,9 +146,20 @@ document.getElementById('detectButton').addEventListener('click', async () => {
     `;
 
     updateProgressBar(100, 'Detection and processing complete!');
-    setTimeout(resetProgressBar, 2000);
+    setTimeout(() => {
+      resetProgressBar();
+      showDeliveryPopup(); // 👈 Moved here after full display
+    }, 5000); // 👈 This 2000 means a 2-second delay
   } catch (error) {
     alert(error.message);
     resetProgressBar();
   }
+});
+
+// Clear data from containers
+document.getElementById('clearButton').addEventListener('click', () => {
+  document.getElementById('capturedImage').innerHTML = '<h2>Captured Image</h2>';
+  document.getElementById('detectedDimensions').innerHTML = '<h2>Detected Dimensions</h2>';
+  document.getElementById('resultsContainer').innerHTML = '<h2>Optimal Result</h2>';
+  console.log('Data cleared from all containers.');
 });

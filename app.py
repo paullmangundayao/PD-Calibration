@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request, send_from_directory, render_template
-# from initial_seal import InitialSealController
+from initial_seal import InitialSealController
 from liver import run_delivery
 import os
 import algot as detection

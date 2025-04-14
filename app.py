@@ -101,7 +101,7 @@ def initial_seal():
 @app.route('/emergency-stop', methods=['POST'])
 def emergency_stop():
     try:
-        from liver import emergency_stop  # 🛑 Add your actual emergency stop logic in this function
+        from liver import emergency_stop  
         emergency_stop()
         return jsonify({
             "status": "success",

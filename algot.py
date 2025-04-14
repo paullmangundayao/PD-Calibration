@@ -12,9 +12,9 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %
 # --- Configuration and Setup ---
 
 # GPIO pin assignments for ultrasonic sensor and servo motor.
-TRIG_PIN = 23      # Trigger pin for HC-SR04
-ECHO_PIN = 24      # Echo pin for HC-SR04
-SERVO_PIN = 18    # PWM output pin for servo controlling the side camera
+TRIG_PIN = 13      # Trigger pin for HC-SR04
+ECHO_PIN = 6      # Echo pin for HC-SR04
+SERVO_PIN = 19    # PWM output pin for servo controlling the side camera
 
 # Control constants
 NEUTRAL_ANGLE = 90        # Neutral servo angle (degrees)
@@ -38,11 +38,7 @@ GPIO.setmode(GPIO.BCM)          # Initialize the GPIO mode to BCM
 GPIO.setwarnings(False)         # Disable warnings if reinitializing GPIO
 GPIO.setup(TRIG_PIN, GPIO.OUT)  # Set the trigger pin as an output
 GPIO.setup(ECHO_PIN, GPIO.IN)   # Set the echo pin as an input
-GPIO.setup(SERVO_PIN, GPIO.OUT) # Set the servo pin as an output
 
-# Initialize servo PWM at 50Hz (common for servos)
-servo = GPIO.PWM(SERVO_PIN, 50)
-servo.start(0)  # Start with a zero duty cycle
 logging.debug("GPIO setup complete.")
 
 
@@ -54,6 +50,13 @@ def measure_distance(timeout=0.2):
     Includes a timeout to avoid infinite loops if no echo is received.
     """
     logging.debug("Measuring distance...")
+
+    # Ensure GPIO is set up
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setwarnings(False)
+    GPIO.setup(TRIG_PIN, GPIO.OUT)
+    GPIO.setup(ECHO_PIN, GPIO.IN)
+
     GPIO.output(TRIG_PIN, False)
     time.sleep(0.0002)  # 200 microseconds delay
 
@@ -81,20 +84,37 @@ def measure_distance(timeout=0.2):
             return None
 
     elapsed_time = stop_time - start_time
-    distance = (elapsed_time * 34300) / 2  # Calculate distance (cm)
+    distance = (elapsed_time * 34300) / 2  # cm
     logging.debug(f"Distance measured: {distance:.2f} cm")
+
     return distance
 
 
+
 def set_servo_angle(angle):
-    """Sets the servo to the specified angle (0 to 180 degrees) by converting it to the proper PWM duty cycle."""
+    """Sets the servo to the specified angle (0 to 160 degrees) by creating a fresh PWM instance."""
     logging.debug(f"Setting servo angle to: {angle} degrees")
-    angle = max(0, min(160, angle))  # Constrain the angle to [0, 160]
-    duty_cycle = angle / 18.0 + 2.5  # Conversion formula; may need fine-tuning for your servo
-    servo.ChangeDutyCycle(duty_cycle)
-    time.sleep(0.5)  # Give time for the servo to move
-    servo.ChangeDutyCycle(0)  # Turn off PWM to reduce jitter
-    logging.debug("Servo angle set.")
+    try:
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setwarnings(False)
+        GPIO.setup(SERVO_PIN, GPIO.OUT)
+
+        servo = GPIO.PWM(SERVO_PIN, 50)
+        servo.start(0)
+
+        angle = max(0, min(160, angle))  # Clamp angle
+        duty_cycle = angle / 18.0 + 2.5
+        servo.ChangeDutyCycle(duty_cycle)
+        time.sleep(0.5)
+        servo.ChangeDutyCycle(0)
+
+        servo.stop()
+        del servo
+        GPIO.cleanup(SERVO_PIN)  # Only clean up the used pin
+        logging.debug("Servo angle set and cleaned.")
+    except Exception as e:
+        logging.error(f"[Servo ERROR] {e}")
+        GPIO.cleanup(SERVO_PIN)
 
 
 def adjust_side_camera_position(target_distance=TARGET_DISTANCE, tolerance=0.5, max_iterations=20):
@@ -301,8 +321,8 @@ def calculate_2d_bubble_wrap_size(optimal_dimensions):
     optimal_width = optimal_dimensions["Optimal Width"]
     optimal_height = optimal_dimensions["Optimal Height"]
     
-    bubble_wrap_length = (2 * optimal_height) + (2 * optimal_width)
-    bubble_wrap_width = (2 * optimal_length) + (2 * optimal_width)
+    bubble_wrap_length = (optimal_height) + (optimal_width)
+    bubble_wrap_width = (optimal_length) + (optimal_width)
     logging.debug(f"Calculated bubble wrap size: length={bubble_wrap_length}, width={bubble_wrap_width}")
     return {"length": bubble_wrap_length, "width": bubble_wrap_width}
 
@@ -374,9 +394,6 @@ def test_measure_and_optimize():
     else:
         logging.error("Test failed: No results returned. Check camera setup or sensor connections.")
 
-class AlgoOptimizer:
-    def measure_and_optimize(self):
-        return measure_and_optimize()
 
 if __name__ == "__main__":
     try:

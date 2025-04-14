@@ -416,7 +416,7 @@ button:hover:enabled {
   display: flex;
   justify-content: center;
   align-items: flex-start; /* start from top */
-  padding-top: 400px; /* shift popup lower */
+  padding-top: 500px; /* shift popup lower */
   z-index: 1000;
 }
 

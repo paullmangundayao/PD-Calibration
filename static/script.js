@@ -20,19 +20,46 @@ function resetProgressBar() {
   progressText.textContent = '';
 }
 
-// ▶️ Activate Initial Sealing Button Listener
+// Activate Initial Sealing Button Listener
 document.getElementById('initialSealButton').addEventListener('click', async () => {
-  updateProgressBar(10, 'Activating Initial Sealing...');
+  updateProgressBar(10, 'Feeding bubble wrap...');
+
+  try {
+    const response = await fetch('/feed-wrap', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ length: 50 })
+    });
+    const result = await response.json();
+
+    if (!response.ok) throw new Error(result.message || 'Feed failed');
+    updateProgressBar(60, 'Feed complete!');
+    setTimeout(() => {
+      resetProgressBar();
+      document.getElementById('sealConfirmModal').style.display = 'block';
+    }, 1000);
+  } catch (error) {
+    alert("Error: " + error.message);
+    resetProgressBar();
+  }
+});
+
+// Confirm button inside modal
+document.getElementById('confirmSeal').addEventListener('click', async () => {
+  document.getElementById('sealConfirmModal').style.display = 'none';
+  updateProgressBar(10, 'Performing sealing...');
+
   try {
     const response = await fetch('/initial-seal', { method: 'POST' });
     const result = await response.json();
 
-    if (!response.ok) throw new Error(result.message || 'Initial sealing failed');
+    if (!response.ok) throw new Error(result.message || 'Sealing failed');
     alert(result.message);
+    updateProgressBar(100, 'Sealing complete!');
   } catch (error) {
-    alert(error.message);
+    alert("Error: " + error.message);
   } finally {
-    resetProgressBar();
+    setTimeout(() => resetProgressBar(), 2000);
   }
 });
 
@@ -42,7 +69,7 @@ function toggleMenu() {
   menuContent.style.display = menuContent.style.display === "flex" ? "none" : "flex";
 }
 
-// Toggle tooltips (a single function to show/hide any tooltip)
+// Toggle tooltips
 function toggleTooltip(tooltipId) {
   const tooltip = document.getElementById(tooltipId);
   tooltip.style.display = tooltip.style.display === 'block' ? 'none' : 'block';
@@ -51,7 +78,6 @@ function toggleTooltip(tooltipId) {
 // Toggle dark mode
 function toggleDarkMode() {
   document.body.classList.toggle("dark-mode");
-  // Force redraw for smoother transitions
   document.querySelectorAll('.card-light, button').forEach(el => {
     el.style.display = 'none';
     el.offsetHeight; // Trigger reflow
@@ -59,7 +85,7 @@ function toggleDarkMode() {
   });
 }
 
-// Add this function to show the delivery popup
+// Show delivery popup
 function showDeliveryPopup() {
   const popup = document.createElement('div');
   popup.id = 'deliveryPopup';
@@ -75,7 +101,7 @@ function showDeliveryPopup() {
   `;
   document.body.appendChild(popup);
 
-  // Event listeners (Delivery Popup)
+  // Delivery button
   document.getElementById('deliverButton').addEventListener('click', async () => {
     try {
       updateProgressBar(30, 'Initiating delivery...');
@@ -83,6 +109,8 @@ function showDeliveryPopup() {
       if (!response.ok) throw new Error('Delivery failed');
       const result = await response.json();
       alert(result.message);
+
+      document.getElementById('clearButton').click();
       popup.remove();
       resetProgressBar();
     } catch (error) {
@@ -92,45 +120,59 @@ function showDeliveryPopup() {
     }
   });
 
+  // Recapture button
   document.getElementById('recaptureButton').addEventListener('click', () => {
     popup.remove();
-    document.getElementById('clearButton').click(); // Clear existing results
+    document.getElementById('clearButton').click();
   });
 }
 
-// ✅ Only ONE Detect Button Listener
+// Emergency stop
+document.getElementById('emergencyStopButton').addEventListener('click', async () => {
+  const confirmStop = confirm("Are you sure you want to trigger the EMERGENCY STOP?");
+  if (!confirmStop) return;
+
+  updateProgressBar(50, 'Stopping all hardware...');
+  try {
+    const response = await fetch('/emergency-stop', { method: 'POST' });
+    const result = await response.json();
+
+    if (!response.ok) throw new Error(result.message || 'Emergency stop failed');
+    alert(result.message);
+  } catch (error) {
+    alert("Error: " + error.message);
+  } finally {
+    resetProgressBar();
+  }
+});
+
+// Detect dimensions
 document.getElementById('detectButton').addEventListener('click', async () => {
   updateProgressBar(10, 'Starting detection...');
   try {
     const response = await fetch('/capture-dimensions');
-    if (!response.ok) {
-      throw new Error('Failed to capture dimensions. Please check your camera or sensor setup.');
-    }
+    if (!response.ok) throw new Error('Failed to capture dimensions. Please check your camera or sensor setup.');
+
     updateProgressBar(50, 'Processing captured image...');
     const data = await response.json();
-    if (data.error) {
-      throw new Error(data.error);
-    }
+    if (data.error) throw new Error(data.error);
 
-    // Display the captured image (front camera image)
-    const capturedImageDiv = document.getElementById('capturedImage');
-    capturedImageDiv.innerHTML = `
+    // Captured Image
+    document.getElementById('capturedImage').innerHTML = `
       <h2>Captured Image</h2>
       <img src="${data.image_url}" alt="Captured Image" style="width:100%">
     `;
 
-    // Display the detected dimensions
-    const detectedDimensionsDiv = document.getElementById('detectedDimensions');
-    detectedDimensionsDiv.innerHTML = `
+    // Detected Dimensions
+    document.getElementById('detectedDimensions').innerHTML = `
       <h2>Detected Dimensions</h2>
       <p>Length: ${data.measured_dimensions.length.toFixed(2)} cm</p>
       <p>Width: ${data.measured_dimensions.width.toFixed(2)} cm</p>
       <p>Height: ${data.measured_dimensions.height.toFixed(2)} cm</p>
     `;
 
-    // Display the optimal result
-    const resultsContainer = document.getElementById('resultsContainer');
-    resultsContainer.innerHTML = `
+    // Optimal Results
+    document.getElementById('resultsContainer').innerHTML = `
       <h2>Optimal Result</h2>
       <p>Optimal Dimensions:</p>
       <ul>
@@ -148,7 +190,7 @@ document.getElementById('detectButton').addEventListener('click', async () => {
     updateProgressBar(100, 'Detection and processing complete!');
     setTimeout(() => {
       resetProgressBar();
-      showDeliveryPopup(); // 👈 Moved here after full display
+      showDeliveryPopup();
     }, 5000);
   } catch (error) {
     alert(error.message);

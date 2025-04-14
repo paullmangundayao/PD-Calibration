@@ -1,8 +1,8 @@
 from flask import Flask, jsonify, request, send_from_directory, render_template
 # from initial_seal import InitialSealController
-# from delivery_mechanism import run_delivery
+from liver import run_delivery
 import os
-import testalgo as detection
+import algot as detection
 import logging
 import traceback
 
@@ -97,6 +97,24 @@ def initial_seal():
             "message": "Initial sealing failed",
             "detail": str(e)
         }), 500
+        
+@app.route('/emergency-stop', methods=['POST'])
+def emergency_stop():
+    try:
+        from liver import emergency_stop  # 🛑 Add your actual emergency stop logic in this function
+        emergency_stop()
+        return jsonify({
+            "status": "success",
+            "message": "Emergency stop activated. All hardware stopped."
+        })
+    except Exception as e:
+        logging.error(f"Emergency stop error: {str(e)}")
+        return jsonify({
+            "status": "error",
+            "message": "Emergency stop failed",
+            "detail": str(e)
+        }), 500
+
 
 @app.route('/images/<filename>')
 def images(filename):
@@ -104,6 +122,13 @@ def images(filename):
         return send_from_directory(IMAGE_FOLDER, filename)
     except FileNotFoundError:
         return jsonify({"error": "Image not found"}), 404
-
+@app.route('/images', methods=['GET'])
+def list_images():
+    try:
+        files = os.listdir(IMAGE_FOLDER)
+        images = [f for f in files if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
+        return jsonify({"images": images})
+    except Exception as e:
+        return jsonify({"error": "Failed to list images", "detail": str(e)}), 500
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001, debug=True, use_reloader=False)

@@ -41,6 +41,8 @@
         <button id="initialSealButton">Activate Initial Sealing</button>
         <button id="detectButton">Detect Dimensions</button>
         <button id="clearButton">Clear Results</button>
+        <button id="emergencyStopButton" style="background-color: #e63946;">Emergency Stop</button>
+
         <div id="progressContainer">
           <div id="progressBar"></div>
           <div id="progressText">Initializing...</div>
@@ -48,6 +50,13 @@
       </div>
     </div>
   </div>
+  
+  <div id="sealConfirmModal" class="tooltip" style="display: none;">
+  <p>Bubble wrap feeding complete. Proceed with actuator sealing?</p>
+  <button id="confirmSeal" class="button-done">Yes, Proceed</button>
+  <button onclick="document.getElementById('sealConfirmModal').style.display='none'" class="button-done">Cancel</button>
+</div>
+
 
   <!-- Tooltips -->
   <div class="tooltip" id="helpTooltip">

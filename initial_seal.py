@@ -36,47 +36,37 @@ class InitialSealController:
             time.sleep(0.0005)
         print(f"[Stepper] Moved {length_mm} mm ({steps} steps)")
 
-    def feed_wrap(self, length_mm=50):
-        """Wrapper method to feed bubble wrap before sealing."""
-        try:
-            print(f"[0] Rolling bubble wrap for {length_mm}mm...")
-            self.move_stepper(length_mm)
-            print(f"✅ Feeding complete.")
-        except Exception as e:
-            print(f"Error during bubble wrap feed: {str(e)}")
-            raise
+    def actuate_push(self):
+        """Extend both actuators."""
+        GPIO.output(self.ACT1_PIN1, GPIO.HIGH)
+        GPIO.output(self.ACT1_PIN2, GPIO.LOW)
+        GPIO.output(self.ACT2_PIN1, GPIO.HIGH)
+        GPIO.output(self.ACT2_PIN2, GPIO.LOW)
+        print("[Actuators] Extended")
 
-    def actuator_action(self, actuator_num, action):
-        pins = {
-            1: (self.ACT1_PIN1, self.ACT1_PIN2),
-            2: (self.ACT2_PIN1, self.ACT2_PIN2)
-        }
-        pin1, pin2 = pins[actuator_num]
-        if action == "push":
-            GPIO.output(pin1, GPIO.LOW)
-            GPIO.output(pin2, GPIO.HIGH)
-        else:
-            GPIO.output(pin1, GPIO.HIGH)
-            GPIO.output(pin2, GPIO.LOW)
+    def actuate_pull(self):
+        """Retract both actuators."""
+        GPIO.output(self.ACT1_PIN1, GPIO.LOW)
+        GPIO.output(self.ACT1_PIN2, GPIO.HIGH)
+        GPIO.output(self.ACT2_PIN1, GPIO.LOW)
+        GPIO.output(self.ACT2_PIN2, GPIO.HIGH)
+        print("[Actuators] Retracted")
 
-    def perform_initial_seal(self):
-        """Run the actuator sealing process after bubble wrap is fed."""
-        try:
-            print("[1] Activating top seal actuators...")
-            for actuator in [1, 2]:
-                self.actuator_action(actuator, "push")
-                time.sleep(4)
-                print(f"Sealing with Actuator {actuator}...")
-                time.sleep(3)
-                self.actuator_action(actuator, "pull")
-                time.sleep(3)
+    def feed_wrap(self, length_mm=500):
+        """Feeds wrap, waits, and activates sealing actuators."""
+        print("[Sequence] Feeding bubble wrap...")
+        self.move_stepper(length_mm)
 
-            print("✅ Initial sealing complete!")
-        except Exception as e:
-            print(f"Error during initial sealing: {str(e)}")
-            raise
+        print("[Sequence] Waiting before sealing...")
+        time.sleep(5)
+
+        print("[Sequence] Pushing actuators...")
+        self.actuate_push()
+
+        time.sleep(2)
+
+        print("[Sequence] Pulling actuators...")
+        self.actuate_pull()
 
     def cleanup(self):
-        """Safely reset all GPIO pins."""
         GPIO.cleanup()
-        print("GPIO cleanup done.")

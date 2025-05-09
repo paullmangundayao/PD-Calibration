@@ -50,29 +50,37 @@
       </div>
     </div>
   </div>
-  
-  <div id="sealConfirmModal" class="tooltip" style="display: none;">
-  <p>Bubble wrap feeding complete. Proceed with actuator sealing?</p>
-  <button id="confirmSeal" class="button-done">Yes, Proceed</button>
-  <button onclick="document.getElementById('sealConfirmModal').style.display='none'" class="button-done">Cancel</button>
-</div>
 
+
+<div id="sealConfirmModal" class="tooltip" style="display: none;">
+  <div class="popup-content">
+    <h3>Confirm Sealing</h3>
+    <p>Bubble wrap feeding complete. Proceed with actuator sealing?</p>
+    <div class="popup-buttons">
+      <button id="confirmSeal" class="button-done">Yes, Proceed</button>
+      <button onclick="document.getElementById('sealConfirmModal').style.display='none'" class="button-done">Cancel</button>
+    </div>
+  </div>
+</div>
 
   <!-- Tooltips -->
   <div class="tooltip" id="helpTooltip">
     <p>
-      <strong>Detect Dimensions Button:</strong> Captures object dimensions,
-      displays the image with a bounding box in the Captured Image container, and
-      shows the detected measurements in the Detected Dimensions container.
+      <strong>Activate Initial Sealing Button:</strong> Activates the 
+      initial sealing process so that the base of the bubble wrap is already 
+      wrapped before proceeding with the delivery of the product.
     </p>
     <p>
-      <strong>Process Dimensions Button:</strong> Calculates the optimal
-      packaging dimensions based on detected data and displays the result on the
-      results container.
+      <strong>Detect Dimensions Button:</strong> Captures object dimensions,
+      displays the image with a bounding box in the Captured Image container and
+      shows the detected measurements in the Detected Dimensions container.
     </p>
     <p>
       <strong>Clear Results Button:</strong> Clears the captured image, detected
       dimensions, and results.
+    </p>
+    <p>
+      <strong>Emergency Stop Button:</strong> Stops the current process happening.
     </p>
     <button class="button-done" onclick="toggleTooltip('helpTooltip')">
       Understood

@@ -1,12 +1,15 @@
 from flask import Flask, jsonify, request, send_from_directory, render_template
 from initial_seal import InitialSealController
-from liver import run_delivery
+from flask import session 
+from delivery_mechanism import run_delivery
+from emergency_stop import emergency_stop as hardware_emergency_stop
 import os
 import algot as detection
 import logging
 import traceback
 
 app = Flask(__name__)
+app.secret_key = '1234'
 
 # Logging configuration
 logging.basicConfig(level=logging.DEBUG)
@@ -26,20 +29,24 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
 
-        if username == 'admin' and password == '1234':
-            return render_template('index.html')  
+        if username == 'team35' and password == 'team35':
+            session['authenticated'] = True  # Set session flag
+            return render_template('index.html')
         else:
             error = "Invalid username or password."
             return render_template('login.html', error=error)
-
     return render_template('login.html')
 
 @app.route('/capture-dimensions', methods=['GET'])
 def capture_dimensions():
     try:
-        result = detection.measure_and_optimize()
-        if result:
+        # Store result in session instead of just returning
+        session['measurement_data'] = detection.measure_and_optimize()
+        
+        if session['measurement_data']:
+            result = session['measurement_data']
             front_image_url = os.path.join('/images', os.path.basename(result["front_image_path"]))
+            
             return jsonify({
                 "measured_dimensions": {
                     "length": result["object_dimensions"][0],
@@ -52,57 +59,73 @@ def capture_dimensions():
                 "delivery": True
             })
         else:
-            return jsonify({"error": "Measurement and optimization yielded no results"}), 500
+            return jsonify({"error": "Measurement failed"}), 500
+            
     except Exception as e:
-        logging.error("Capture error: %s", str(e))
-        logging.error(traceback.format_exc())
-        return jsonify({"error": "Failed to capture dimensions.", "detail": str(e)}), 500
+        logging.error(f"Capture error: {str(e)}")
+        return jsonify({"error": "Measurement failed"}), 500
 
 @app.route('/deliver-product', methods=['POST'])
 def deliver_product():
     try:
-        success = run_delivery()
+        if 'measurement_data' not in session:
+            return jsonify({"error": "Capture dimensions first"}), 400
+            
+        wrap_width = session['measurement_data']['bubble_wrap_size']['width']
+        wrap_length = session['measurement_data']['bubble_wrap_size']['length']
+
+        # Call with both width and length
+        success = run_delivery(wrap_width, wrap_length)
+        
         if success:
-            return jsonify({
-                "status": "success",
-                "message": "Product packed successfully"
-            })
-        else:
-            return jsonify({
-                "status": "error",
-                "message": "Failed to activate packaging mechanism"
-            }), 500
+            return jsonify({"status": "success"})
+        return jsonify({"status": "error"}), 500
+            
     except Exception as e:
         logging.error(f"Delivery error: {str(e)}")
-        return jsonify({
-            "status": "error",
-            "message": "Delivery failed",
-            "detail": str(e)
-        }), 500
-
-@app.route('/initial-seal', methods=['POST'])
-def initial_seal():
+        return jsonify({"error": str(e)}), 500
+        
+@app.route('/initial-feed', methods=['POST'])
+def initial_feed():
+    controller = None
     try:
+        if not session.get('authenticated'):
+            return jsonify({"status": "error", "message": "Unauthorized"}), 401
+
         controller = InitialSealController()
-        controller.perform_initial_seal()
-        controller.cleanup()
-        return jsonify({
-            "status": "success",
-            "message": "Initial sealing completed successfully"
-        })
+        controller.perform_feeding()  # Only does the feeding
+        return jsonify({"status": "success", "message": "Bubble wrap feeding completed"})
+
     except Exception as e:
-        logging.error(f"Initial sealing error: {str(e)}")
-        return jsonify({
-            "status": "error",
-            "message": "Initial sealing failed",
-            "detail": str(e)
-        }), 500
+        logging.error(f"Feeding error: {str(e)}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+    finally:
+        if controller:
+            controller.cleanup()
+
+@app.route('/initial-seal-actuate', methods=['POST'])
+def initial_seal_actuate():
+    controller = None
+    try:
+
+        app.logger.info("Initializing sealing controller...")
+        controller = InitialSealController()
+        app.logger.info("Performing sealing operation...")
+        controller.perform_sealing()
+        return jsonify({"status": "success", "message": "Actuator sealing completed"})
+
+    except Exception as e:
+        logging.error(f"Sealing error: {str(e)}")
+        traceback.print_exc()
+        return jsonify({"status": "error", "message": str(e)}), 500
+    finally:
+        if controller:
+            controller.cleanup()
         
 @app.route('/emergency-stop', methods=['POST'])
 def emergency_stop():
     try:
-        from liver import emergency_stop  
-        emergency_stop()
+        hardware_emergency_stop()
         return jsonify({
             "status": "success",
             "message": "Emergency stop activated. All hardware stopped."
@@ -114,7 +137,6 @@ def emergency_stop():
             "message": "Emergency stop failed",
             "detail": str(e)
         }), 500
-
 
 @app.route('/images/<filename>')
 def images(filename):

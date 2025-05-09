@@ -415,8 +415,8 @@ button:hover:enabled {
   height: 100%;
   display: flex;
   justify-content: center;
-  align-items: flex-start; 
-  padding-top: 500px; 
+  align-items: flex-start; /* start from top */
+  padding-top: 500px; /* shift popup lower */
   z-index: 1000;
 }
 
@@ -427,7 +427,7 @@ button:hover:enabled {
   text-align: center;
   max-width: 400px;
   width: 90%;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); 
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); /* soft shadow */
 }
 
 .popup-buttons {
@@ -469,4 +469,156 @@ button:hover:enabled {
 .popup-content p {
   margin-bottom: 1.5rem;
   color: #666;
+}
+
+@media (max-width: 768px) {
+  .container {
+    width: 100%;
+    height: auto;
+    border-radius: 0;
+    padding: 10px 5px;
+    box-shadow: none;
+    background: rgba(255, 255, 255, 0.95);
+  }
+
+  .scroll-wrapper {
+    max-height: none;
+    overflow-y: visible;
+  }
+
+  .content-wrapper {
+    grid-template-columns: 1fr;
+    gap: 15px;
+    width: 95%;
+    padding: 0 10px;
+  }
+
+  .card-light, .button-container-light {
+    width: 100%;
+    max-height: none;
+    padding: 15px;
+    font-size: 1rem;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+    margin-top: 20px;
+    padding: 5px;
+  }
+
+  h2 {
+    font-size: 1.3rem;
+    margin: 8px 0;
+  }
+
+  button {
+    font-size: 0.9rem;
+    padding: 12px 18px;
+    min-width: 120px;
+  }
+
+  .button-container-light {
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 15px;
+  }
+
+  #progressBar {
+    height: 18px;
+  }
+
+  #progressText {
+    font-size: 0.8rem;
+  }
+
+  .header img {
+    width: 70px;
+    height: 70px;
+    padding-left: 15px;
+  }
+
+  .menu {
+    top: 10px;
+    left: 10px;
+    margin-left: 0;
+  }
+
+  .menu-content {
+    flex-direction: column;
+    left: 0;
+    top: 100%;
+    width: 100vw;
+    border-radius: 0 0 8px 8px;
+  }
+
+  .menu-content button {
+    width: 100%;
+    text-align: left;
+    padding: 12px 20px;
+  }
+
+  #deliveryPopup {
+    padding-top: 40%;
+  }
+
+  #deliveryPopup .popup-content {
+    max-width: 90%;
+    padding: 1.5rem;
+  }
+
+  .popup-buttons {
+    flex-direction: column;
+  }
+}
+
+/* iPhone notch/punch-hole safe areas */
+@supports (padding: max(0px)) {
+  .container, .button-container-light {
+    padding-left: max(15px, env(safe-area-inset-left));
+    padding-right: max(15px, env(safe-area-inset-right));
+  }
+  
+  .menu {
+    left: max(20px, env(safe-area-inset-left));
+  }
+}
+
+/* High-density mobile screens */
+@media (-webkit-min-device-pixel-ratio: 3) {
+  button {
+    border-width: 0.5px;
+  }
+  
+  .card-light {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Foldable devices */
+@media (spanning: single-fold-vertical) {
+  .container {
+    width: env(fold-width);
+    margin: 0 auto;
+  }
+}
+
+/* Orientation-specific adjustments */
+@media (orientation: portrait) {
+  .content-wrapper {
+    grid-template-rows: repeat(3, auto);
+  }
+}
+
+@media (orientation: landscape) and (max-width: 768px) {
+  .container {
+    padding-top: 5px;
+  }
+  
+  .content-wrapper {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  #resultsContainer {
+    grid-column: span 2;
+  }
 }

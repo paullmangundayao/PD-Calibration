@@ -19,17 +19,17 @@ SERVO_PIN = 19    # PWM output pin for servo controlling the side camera
 # Control constants
 NEUTRAL_ANGLE = 90        # Neutral servo angle (degrees)
 SCALING_FACTOR = 1.2      # Factor for converting distance error to servo angle adjustment (adjusted for 22 cm)
-TARGET_DISTANCE = 19.8    
+TARGET_DISTANCE = 15    
 
 # Genetic algorithm and optimization constants
 POPULATION_SIZE = 10
 GENERATIONS = 50
-SEALING_MARGIN = 2        # Extra margin added to object dimensions
+SEALING_MARGIN = 0.5      # Extra margin added to object dimensions
 MUTATION_RATE = 0.1
 
 # Pixel-to-cm ratio (calibrate this based on your setup; note that the front camera is fixed at 30 cm)
 PIXEL_TO_CM_RATIO_FRONT = 0.06035  # Calibration for front camera (cm per pixel) 0.0605 
-PIXEL_TO_CM_RATIO_SIDE  = 0.049  # Calibration for side camera (cm per pixel) 0.04885
+PIXEL_TO_CM_RATIO_SIDE  = 0.03895  # Calibration for side camera (cm per pixel) 0.04885
 
 
 # --- Setup GPIO ---
@@ -203,7 +203,7 @@ def detect_front_dimensions(camera):
     # Using default string conversion so that 7.26 becomes 7.3 (and 7.0 will show as 7.0)
     logging.debug(f"Front dimensions detected: width={width_cm} cm, height={height_cm} cm. Image saved to {image_path}")
 
-    return width_cm, height_cm, image_path
+    return width_cm - 0.4, height_cm + 0.3, image_path
 
 
 def detect_side_dimension(camera):
@@ -258,7 +258,7 @@ def detect_side_dimension(camera):
         cv2.imwrite(image_path, roi)
 
         logging.debug(f"Side dimension detected: length={length_cm} cm. Image saved to {image_path}")
-        return length_cm, image_path
+        return length_cm + 0.1, image_path
 
     logging.error("Failed to detect side dimensions after multiple attempts.")
     return None, None

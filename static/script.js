@@ -20,48 +20,64 @@ function resetProgressBar() {
   progressText.textContent = '';
 }
 
-// Activate Initial Sealing Button Listener
+
+// Updated initialSealButton event listener
 document.getElementById('initialSealButton').addEventListener('click', async () => {
   updateProgressBar(10, 'Feeding bubble wrap...');
-
+  
   try {
-    const response = await fetch('/feed-wrap', {
+    // First, perform feeding
+    const feedResponse = await fetch('/initial-feed', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ length: 50 })
+      headers: { 'Content-Type': 'application/json' }
     });
-    const result = await response.json();
+    
+    const feedResult = await feedResponse.json();
+    if (!feedResponse.ok) throw new Error(feedResult.message || 'Feeding failed');
+    
+    updateProgressBar(100, 'Feeding completed!');
+    setTimeout(resetProgressBar, 1500);
 
-    if (!response.ok) throw new Error(result.message || 'Feed failed');
-    updateProgressBar(60, 'Feed complete!');
-    setTimeout(() => {
+    // Show confirmation modal
+    const modal = document.getElementById('sealConfirmModal');
+    modal.style.display = 'block';
+
+    // Handle confirm button - MODIFIED SECTION
+    document.getElementById('confirmSeal').addEventListener('click', async function handler() {
+      modal.style.display = 'none'; // Close modal immediately on confirm
+      updateProgressBar(30, 'Activating actuators...');
+      
+      try {
+        const sealResponse = await fetch('/initial-seal-actuate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const sealResult = await sealResponse.json();
+        if (!sealResponse.ok) throw new Error(sealResult.message || 'Sealing failed');
+        
+        updateProgressBar(100, 'Sealing completed!');
+        setTimeout(() => {
+          resetProgressBar();
+        }, 2000);
+      } catch (error) {
+        alert("Sealing error: " + error.message);
+        resetProgressBar();
+      }
+      this.removeEventListener('click', handler);
+    }, { once: true });
+
+    // Handle cancel button remains the same
+    document.querySelector('#sealConfirmModal button[onclick]').addEventListener('click', () => {
+      modal.style.display = 'none';
       resetProgressBar();
-      document.getElementById('sealConfirmModal').style.display = 'block';
-    }, 1000);
+    }, { once: true });
+
   } catch (error) {
-    alert("Error: " + error.message);
+    alert("Error during feeding: " + error.message);
     resetProgressBar();
   }
 });
 
-// Confirm button inside modal
-document.getElementById('confirmSeal').addEventListener('click', async () => {
-  document.getElementById('sealConfirmModal').style.display = 'none';
-  updateProgressBar(10, 'Performing sealing...');
-
-  try {
-    const response = await fetch('/initial-seal', { method: 'POST' });
-    const result = await response.json();
-
-    if (!response.ok) throw new Error(result.message || 'Sealing failed');
-    alert(result.message);
-    updateProgressBar(100, 'Sealing complete!');
-  } catch (error) {
-    alert("Error: " + error.message);
-  } finally {
-    setTimeout(() => resetProgressBar(), 2000);
-  }
-});
 
 // Toggle the display of the menu
 function toggleMenu() {
@@ -108,7 +124,7 @@ function showDeliveryPopup() {
       const response = await fetch('/deliver-product', { method: 'POST' });
       if (!response.ok) throw new Error('Delivery failed');
       const result = await response.json();
-      alert(result.message);
+      alert(result.message || "Product delivered successfully!");
 
       document.getElementById('clearButton').click();
       popup.remove();
@@ -129,8 +145,6 @@ function showDeliveryPopup() {
 
 // Emergency stop
 document.getElementById('emergencyStopButton').addEventListener('click', async () => {
-  const confirmStop = confirm("Are you sure you want to trigger the EMERGENCY STOP?");
-  if (!confirmStop) return;
 
   updateProgressBar(50, 'Stopping all hardware...');
   try {

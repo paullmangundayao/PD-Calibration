@@ -67,7 +67,7 @@ STEPS_PER_CM_FORK = STEPS_PER_REV_FORK / LEAD_SCREW_PITCH_FORK_CM
 # ========== Timing and Constants ==========
 PULSE_WIDTH = 0.0005
 STANDARD_BUBBLE_WRAP_WIDTH_CM = 25.4
-SERVO_ACTIVATION_ANGLE = 120    # Degrees for package release
+SERVO_ACTIVATION_ANGLE = 55    # Degrees for package release
 
 # ========== Actuator Control Functions ==========
 def turn_off_top_actuators():
@@ -269,7 +269,12 @@ def run_delivery(optimal_width_cm, optimal_length_cm):
         # Existing package handling sequence
         logging.info("-- INITIATING PACKAGE HANDLING --")
         if not set_servo_angle(SERVO_ACTIVATION_ANGLE):
-            raise RuntimeError("Package release failed")
+            logging.warning("Primary servo activation failed, attempting recovery sequence...")
+            for angle in [50, 55, 25, 10, 0]:
+                if not set_servo_angle(angle):
+                    logging.error(f"Failed to move servo to {angle}° in recovery sequence")
+                time.sleep(0.3)
+            raise RuntimeError("Package release failed after recovery attempts")
             
         # Modified fork movement sequence
         time.sleep(3)
@@ -321,7 +326,6 @@ def run_delivery(optimal_width_cm, optimal_length_cm):
         logging.info("-- WIDTH ADJUSTMENT PHASE --")
         if not move_both_rails(half_expansion, 'backward', half_expansion, 'backward'):
             raise RuntimeError("Rail adjustment failed")
-
 
         logging.info("COMPLETE: Full delivery sequence successful")
         return True

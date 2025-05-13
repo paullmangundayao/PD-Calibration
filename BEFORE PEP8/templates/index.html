@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dimension Optimization</title>
+  <!-- Link to external CSS file -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  <!-- Import Google Fonts -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
+    rel="stylesheet"
+  />
+</head>
+<body>
+  <div class="background-animation"></div>
+  <div class="scroll-wrapper">
+    <div class="container">
+      <header class="header">
+        <img
+          src="https://3.bp.blogspot.com/-TgxQ9rzb__0/VYpnUQFUnvI/AAAAAAAAA5k/JJEJNRvSAKs/s1600/tesseract-landing-cover.png"
+          alt="Logo"
+        />
+        <h1>EXACTOPACK</h1>
+      </header>
+      <main class="content-wrapper">
+        <!-- Container for the front camera image -->
+        <section id="capturedImage" class="card-light">
+          <h2>Captured Image</h2>
+        </section>
+        <!-- Container for the measured dimensions -->
+        <section id="detectedDimensions" class="card-light">
+          <h2>Detected Dimensions</h2>
+        </section>
+        <!-- Container for the optimal packaging result -->
+        <section id="resultsContainer" class="card-light">
+          <h2>Optimal Result</h2>
+        </section>
+      </main>
+      <div id="buttonContainer" class="button-container-light">
+        <button id="initialSealButton">Activate Initial Sealing</button>
+        <button id="detectButton">Detect Dimensions</button>
+        <button id="clearButton">Clear Results</button>
+        <button id="emergencyStopButton" style="background-color: #e63946;">Emergency Stop</button>
+
+        <div id="progressContainer">
+          <div id="progressBar"></div>
+          <div id="progressText">Initializing...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+<div id="sealConfirmModal" class="tooltip" style="display: none;">
+  <div class="popup-content">
+    <h3>Confirm Sealing</h3>
+    <p>Bubble wrap feeding complete. Proceed with actuator sealing?</p>
+    <div class="popup-buttons">
+      <button id="confirmSeal" class="button-done">Yes, Proceed</button>
+      <button onclick="document.getElementById('sealConfirmModal').style.display='none'" class="button-done">Cancel</button>
+    </div>
+  </div>
+</div>
+
+  <!-- Tooltips -->
+  <div class="tooltip" id="helpTooltip">
+    <p>
+      <strong>Activate Initial Sealing Button:</strong> Activates the 
+      initial sealing process so that the base of the bubble wrap is already 
+      wrapped before proceeding with the delivery of the product.
+    </p>
+    <p>
+      <strong>Detect Dimensions Button:</strong> Captures object dimensions,
+      displays the image with a bounding box in the Captured Image container and
+      shows the detected measurements in the Detected Dimensions container.
+    </p>
+    <p>
+      <strong>Clear Results Button:</strong> Clears the captured image, detected
+      dimensions, and results.
+    </p>
+    <p>
+      <strong>Emergency Stop Button:</strong> Stops the current process happening.
+    </p>
+    <button class="button-done" onclick="toggleTooltip('helpTooltip')">
+      Understood
+    </button>
+  </div>
+
+  <div class="tooltip" id="infoTooltip">
+    <p><strong>Team Composition:</strong></p>
+    <p>Christelle John T. Ladisla - Railway Engineering</p>
+    <p>Danilo Jr. G. Buan - Intelligent Systems</p>
+    <p>Marcus Joshua D.C. Espiritu - Systems Administration</p>
+    <p>Paull Andrei A. Mangundayao - Systems Administration</p>
+    <p>Raven Charles Roy P. Jacinto - Intelligent Systems</p>
+    <button class="button-done" onclick="toggleTooltip('infoTooltip')">
+      Done
+    </button>
+  </div>
+
+  <div class="tooltip" id="aboutTooltip" style="display: none;">
+    <p><strong>About the Project:</strong></p>
+    <p>
+      This project, named <strong>EXACTOPACK</strong>, is a design of packaging
+      material optimization system for an automated bubble wrap packaging process,
+      focusing on enhancing efficiency and reducing plastic waste in e-commerce.
+      The system automates the measurement of products using web cameras,
+      optimizes the use of bubble wrap using a metaheuristic algorithm, automates
+      the wrapping of the product using the optimized bubble wrap size, and delivers
+      fully packaged products ready for final labeling and delivery.
+    </p>
+    <button class="button-done" onclick="toggleTooltip('aboutTooltip')">
+      Close
+    </button>
+  </div>
+
+  <!-- Menu -->
+  <div class="menu">
+    <button onclick="toggleMenu()">☰ Menu</button>
+    <div class="menu-content" id="menuContent" style="display: none;">
+      <button onclick="toggleTooltip('infoTooltip')">Team Information</button>
+      <button onclick="toggleTooltip('helpTooltip')">Help</button>
+      <button onclick="toggleDarkMode()">Switch Mode</button>
+      <button onclick="toggleTooltip('aboutTooltip')">About the Project</button>
+    </div>
+  </div>
+
+  <!-- Link to external JavaScript file -->
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

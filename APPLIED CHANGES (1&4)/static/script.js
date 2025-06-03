@@ -120,6 +120,12 @@ function toggleDarkMode() {
   });
 }
 
+// Instruction toggle function
+function toggleInstruction() {
+  const tooltip = document.getElementById('instructionTooltip');
+  tooltip.style.display = tooltip.style.display === 'block' ? 'none' : 'block';
+}
+
 // Show delivery popup with Clear Data button
 function showDeliveryPopup() {
   const popup = document.createElement('div');

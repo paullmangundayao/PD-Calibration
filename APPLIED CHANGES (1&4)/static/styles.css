@@ -56,7 +56,8 @@ h2 {
   left: 0;
   width: 200vw;
   height: 200vh;
-  background: radial-gradient(circle at 20% 20%, rgba(139, 143, 185, 0.3), transparent 25%),
+  background: radial-gradient(cir
+   at 20% 20%, rgba(139, 143, 185, 0.3), transparent 25%),
     radial-gradient(circle at 80% 20%, rgba(60, 62, 77, 0.3), transparent 25%),
     radial-gradient(circle at 30% 80%, rgba(148, 119, 119, 0.3), transparent 25%),
     radial-gradient(circle at 70% 70%, rgba(127, 127, 131, 0.3), transparent 25%);
@@ -581,6 +582,49 @@ button:disabled {
 #emergencyStopButton:disabled {
   background-color: #f44336 !important; /* Keep red color even when disabled */
   opacity: 0.9;
+}
+
+.show-instruction {
+  position: absolute;
+  top: 0;
+  left: 80%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+  background-color: rgb(4, 4, 33);
+  border: 0;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.99);
+  z-index: 101;
+}
+
+.show-instruction button {
+  background-color: #0e1b31;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.show-instruction button:hover {
+  background-color: #04eff7;
+}
+
+.instruction-tooltip {
+  display: none;
+  background-color: #2C2D3B;
+  color: #FBF8F0;
+  padding: 15px;
+  border-radius: 8px;
+  max-width: 400px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.instruction-tooltip p {
+  margin: 0;
+  line-height: 1.6;
 }
 
 /* iPhone notch/punch-hole safe areas */

@@ -40,7 +40,6 @@
       <div id="buttonContainer" class="button-container-light">
         <button id="initialSealButton">Activate Initial Sealing</button>
         <button id="detectButton">Detect Dimensions</button>
-        <button id="clearButton">Clear Results</button>
         <button id="emergencyStopButton" style="background-color: #e63946;">Emergency Stop</button>
 
         <div id="progressContainer">
@@ -125,6 +124,20 @@
       <button onclick="toggleTooltip('aboutTooltip')">About the Project</button>
     </div>
   </div>
+
+  <div class="show-instruction">
+  <button onclick="toggleInstruction()">SHOW INSTRUCTION</button>
+  <div class="instruction-tooltip" id="instructionTooltip" style="display: none;">
+    <p>
+      Zero Step: Set-up the bubble wrap first, then click "activate initial sealing" button.<br>
+      First Step: Place the product inside, turn on the lights using a remote, click "detect dimensions" on the web application.<br>
+      Second Step: Verify the results, wait for the modal to popup, choose if you will deliver the item or clear the results to restart.<br>
+      Third Step: Wait for the product to slide and check its position on the delivery platform.<br>
+      Fourth Step: Wait for it to be delivered inside the bubble wrap. A modal will popup again, choose if you want to proceed with the sealing or not.<br>
+      Fifth Step: Wait for the finished product at the bottom of the black table.
+    </p>
+  </div>
+</div>
 
   <!-- Link to external JavaScript file -->
   <script src="{{ url_for('static', filename='script.js') }}"></script>

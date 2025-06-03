@@ -32,13 +32,20 @@ function enableActionButtons() {
   document.getElementById('detectButton').disabled = false;
 }
 
+// Function to clear all data displays
+function clearData() {
+  document.getElementById('capturedImage').innerHTML = '<h2>Captured Image</h2>';
+  document.getElementById('detectedDimensions').innerHTML = '<h2>Detected Dimensions</h2>';
+  document.getElementById('resultsContainer').innerHTML = '<h2>Optimal Result</h2>';
+  console.log('Data cleared from all containers.');
+}
+
 // Updated initialSealButton event listener
 document.getElementById('initialSealButton').addEventListener('click', async () => {
   disableActionButtons();
   updateProgressBar(10, 'Feeding bubble wrap...');
   
   try {
-    // First, perform feeding
     const feedResponse = await fetch('/initial-feed', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' }
@@ -50,13 +57,11 @@ document.getElementById('initialSealButton').addEventListener('click', async () 
     updateProgressBar(100, 'Feeding completed!');
     setTimeout(resetProgressBar, 1500);
 
-    // Show confirmation modal
     const modal = document.getElementById('sealConfirmModal');
     modal.style.display = 'block';
 
-    // Handle confirm button
     document.getElementById('confirmSeal').addEventListener('click', async function handler() {
-      modal.style.display = 'none'; // Close modal immediately on confirm
+      modal.style.display = 'none';
       updateProgressBar(30, 'Activating actuators...');
       
       try {
@@ -80,7 +85,6 @@ document.getElementById('initialSealButton').addEventListener('click', async () 
       this.removeEventListener('click', handler);
     }, { once: true });
 
-    // Handle cancel button
     document.querySelector('#sealConfirmModal button[onclick]').addEventListener('click', () => {
       modal.style.display = 'none';
       resetProgressBar();
@@ -116,7 +120,7 @@ function toggleDarkMode() {
   });
 }
 
-// Show delivery popup
+// Show delivery popup with Clear Data button
 function showDeliveryPopup() {
   const popup = document.createElement('div');
   popup.id = 'deliveryPopup';
@@ -126,7 +130,7 @@ function showDeliveryPopup() {
       <p>What would you like to do next?</p>
       <div class="popup-buttons">
         <button id="deliverButton">Deliver Product</button>
-        <button id="recaptureButton">Recapture Dimensions</button>
+        <button id="clearDataButton">Clear Data</button>
       </div>
     </div>
   `;
@@ -141,7 +145,7 @@ function showDeliveryPopup() {
       const result = await response.json();
       alert(result.message || "Product delivered successfully!");
 
-      document.getElementById('clearButton').click();
+      clearData();
       popup.remove();
       resetProgressBar();
     } catch (error) {
@@ -151,10 +155,10 @@ function showDeliveryPopup() {
     }
   });
 
-  // Recapture button
-  document.getElementById('recaptureButton').addEventListener('click', () => {
+  // Clear Data button (replaces old recapture button)
+  document.getElementById('clearDataButton').addEventListener('click', () => {
+    clearData();
     popup.remove();
-    document.getElementById('clearButton').click();
   });
 }
 
@@ -171,7 +175,7 @@ document.getElementById('emergencyStopButton').addEventListener('click', async (
     alert("Error: " + error.message);
   } finally {
     resetProgressBar();
-    enableActionButtons(); // Re-enable buttons after emergency stop
+    enableActionButtons();
   }
 });
 
@@ -229,12 +233,4 @@ document.getElementById('detectButton').addEventListener('click', async () => {
   } finally {
     enableActionButtons();
   }
-});
-
-// Clear data from containers
-document.getElementById('clearButton').addEventListener('click', () => {
-  document.getElementById('capturedImage').innerHTML = '<h2>Captured Image</h2>';
-  document.getElementById('detectedDimensions').innerHTML = '<h2>Detected Dimensions</h2>';
-  document.getElementById('resultsContainer').innerHTML = '<h2>Optimal Result</h2>';
-  console.log('Data cleared from all containers.');
 });
